@@ -1,5 +1,5 @@
 import React from "react";
-
+//test kipli memege
 import {
   View,
   Text,
