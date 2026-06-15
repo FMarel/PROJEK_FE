@@ -2,6 +2,7 @@ import React from "react";
 //test kipli memege
 //test kipli otong
 //test roho memege
+//test goro memege
 import {
   View,
   Text,
