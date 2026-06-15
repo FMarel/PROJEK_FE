@@ -1,0 +1,1563 @@
+﻿
+--- START OF FILE ios/astratechmobiletemplate/Images.xcassets/AppIcon.appiconset/Contents.json ---
+
+{
+  "images" : [
+    {
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "expo"
+  }
+}
+
+--- END OF FILE ios/astratechmobiletemplate/Images.xcassets/AppIcon.appiconset/Contents.json ---
+
+
+--- START OF FILE ios/astratechmobiletemplate/Images.xcassets/SplashScreenLegacy.imageset/Contents.json ---
+
+{
+  "images" : [
+    {
+      "filename" : "SplashScreenLegacy.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+
+
+--- END OF FILE ios/astratechmobiletemplate/Images.xcassets/SplashScreenLegacy.imageset/Contents.json ---
+
+
+--- START OF FILE ios/astratechmobiletemplate/Images.xcassets/Contents.json ---
+
+{
+  "info" : {
+    "version" : 1,
+    "author" : "expo"
+  }
+}
+
+
+--- END OF FILE ios/astratechmobiletemplate/Images.xcassets/Contents.json ---
+
+
+--- START OF FILE ios/.xcode.env ---
+
+# This `.xcode.env` file is versioned and is used to source the environment
+# used when running script phases inside Xcode.
+# To customize your local environment, you can create an `.xcode.env.local`
+# file that is not versioned.
+
+# NODE_BINARY variable contains the PATH to the node executable.
+#
+# Customize the NODE_BINARY variable here.
+# For example, to use nvm with brew, add the following line
+# . "$(brew --prefix nvm)/nvm.sh" --no-use
+export NODE_BINARY=$(command -v node)
+
+
+--- END OF FILE ios/.xcode.env ---
+
+
+--- START OF FILE ios/Podfile.properties.json ---
+
+{
+  "expo.jsEngine": "hermes",
+  "EX_DEV_CLIENT_NETWORK_INSPECTOR": "true"
+}
+
+
+--- END OF FILE ios/Podfile.properties.json ---
+
+
+--- START OF FILE src/api/axiosInstance.js ---
+
+import { Config } from "@/constants/config";
+import { useAuthStore } from "@/store/useAuthStore";
+import axios from "axios";
+
+const axiosInstance = axios.create({
+  baseURL: Config.API_URL,
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+});
+
+axiosInstance.interceptors.request.use(
+  async (config) => {
+    const token = useAuthStore.getState().token;
+    if (config.params) {
+      const cleanParams = Object.fromEntries(
+        Object.entries(config.params).filter(
+          ([_, value]) => value !== "" && value !== null && value !== undefined,
+        ),
+      );
+      config.params = cleanParams;
+    }
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      useAuthStore.getState().logout();
+    }
+    return Promise.reject(error);
+  },
+);
+
+export default axiosInstance;
+
+
+--- END OF FILE src/api/axiosInstance.js ---
+
+
+--- START OF FILE src/components/common/ErrorBoundary.js ---
+
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { AppText } from "../ui/AppText";
+import { Button } from "../ui/AppButton";
+
+export class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.center}>
+          <AppText variant="h1">Oops! Ada kendala teknis.</AppText>
+          <AppText style={{ marginBottom: 20 }}>
+            Coba muat ulang aplikasi Anda.
+          </AppText>
+          <Button
+            title="Restart"
+            onPress={() => this.setState({ hasError: false })}
+          />
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+});
+
+
+--- END OF FILE src/components/common/ErrorBoundary.js ---
+
+
+--- START OF FILE src/components/common/Loader.js ---
+
+const { COLORS } = require("@/constants/theme");
+const { ActivityIndicator, View } = require("react-native");
+
+export const Loader = () => {
+  return (
+    <View>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+    </View>
+  );
+};
+
+
+--- END OF FILE src/components/common/Loader.js ---
+
+
+--- START OF FILE src/components/common/SkeletonLoader.js ---
+
+import PropTypes from "prop-types";
+import React, { useEffect, useRef } from "react";
+import { Animated } from "react-native";
+
+export const SkeletonLoader = ({ width, height, style }) => {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.3,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        { width, height, opacity, backgroundColor: "#E1E9EE", borderRadius: 8 },
+        style,
+      ]}
+    />
+  );
+};
+
+SkeletonLoader.propTypes = {
+  width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  style: PropTypes.object,
+};
+
+
+--- END OF FILE src/components/common/SkeletonLoader.js ---
+
+
+--- START OF FILE src/components/module/institusi/InstitusiCard.js ---
+
+import { AppCard } from "@/components/ui/AppCard";
+import { useNavigation } from "@react-navigation/native";
+import PropTypes from "prop-types";
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+
+export const InstitusiCard = ({ item }) => {
+  const navigation = useNavigation();
+  return (
+    <TouchableOpacity
+      onPress={() => navigation.navigate("DetailInstitusi", { id: item.id })}
+    >
+      <AppCard style={styles.card}>
+        <View style={styles.header}>
+          <Text style={styles.title}>{item.namaInstitusi}</Text>
+          <View
+            style={[
+              styles.badge,
+              item.status === "Aktif"
+                ? styles.badgeActive
+                : styles.badgeInactive,
+            ]}
+          >
+            <Text style={styles.badgeText}>{item.status}</Text>
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Direktur:</Text>
+          <Text style={styles.value}>{item.namaDirektur}</Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>No. SK:</Text>
+          <Text style={styles.value}>{item.nomorSK}</Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Tanggal SK:</Text>
+          <Text style={styles.value}>
+            {new Date(item.tanggalSK).toLocaleDateString("id-ID")}
+          </Text>
+        </View>
+      </AppCard>
+    </TouchableOpacity>
+  );
+};
+
+InstitusiCard.propTypes = {
+  item: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    namaInstitusi: PropTypes.string.isRequired,
+    namaDirektur: PropTypes.string.isRequired,
+    nomorSK: PropTypes.string.isRequired,
+    tanggalSK: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired,
+  }).isRequired,
+};
+
+const styles = StyleSheet.create({
+  card: { marginBottom: 12, padding: 16 },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  title: { fontSize: 16, fontWeight: "bold", flex: 1, color: "#333" },
+  badge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
+  badgeActive: { backgroundColor: "#D4EDDA" },
+  badgeInactive: { backgroundColor: "#F8D7DA" },
+  badgeText: { fontSize: 10, fontWeight: "bold", color: "#721C24" },
+  divider: { height: 1, backgroundColor: "#EEE", marginVertical: 10 },
+  infoRow: { flexDirection: "row", marginBottom: 4 },
+  label: { width: 80, fontSize: 12, color: "#777" },
+  value: { flex: 1, fontSize: 12, color: "#333", fontWeight: "500" },
+});
+
+
+--- END OF FILE src/components/module/institusi/InstitusiCard.js ---
+
+
+--- START OF FILE src/components/ui/AppButton.js ---
+
+import React from "react";
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { COLORS, SPACING } from "@/constants/theme";
+import PropTypes from "prop-types";
+
+export const Button = ({
+  title,
+  onPress,
+  variant = "primary",
+  loading = false,
+  style,
+}) => {
+  const isPrimary = variant === "primary";
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={loading}
+      activeOpacity={0.7}
+      style={[styles.btn, isPrimary ? styles.primary : styles.outline, style]}
+    >
+      {loading ? (
+        <ActivityIndicator color={isPrimary ? "#FFF" : COLORS.primary} />
+      ) : (
+        <Text
+          style={[styles.text, { color: isPrimary ? "#FFF" : COLORS.primary }]}
+        >
+          {title}
+        </Text>
+      )}
+    </TouchableOpacity>
+  );
+};
+
+Button.propTypes = {
+  title: PropTypes.string.isRequired,
+  onPress: PropTypes.func.isRequired,
+  variant: PropTypes.oneOf(["primary", "outline"]),
+  loading: PropTypes.bool,
+  style: PropTypes.object,
+};
+
+const styles = StyleSheet.create({
+  btn: {
+    padding: SPACING.m,
+    borderRadius: 12,
+    alignItems: "center",
+    minHeight: 50,
+  },
+  primary: { backgroundColor: COLORS.primary },
+  outline: { borderWidth: 1, borderColor: COLORS.primary },
+  text: { fontSize: 16, fontWeight: "700" },
+});
+
+
+--- END OF FILE src/components/ui/AppButton.js ---
+
+
+--- START OF FILE src/components/ui/AppCard.js ---
+
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { COLORS, SPACING } from "@/constants/theme";
+import PropTypes from "prop-types";
+
+export const AppCard = ({ children, style }) => (
+  <View style={[styles.card, style]}>{children}</View>
+);
+
+AppCard.propTypes = {
+  children: PropTypes.node.isRequired,
+  style: PropTypes.object,
+};
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: SPACING.m,
+    marginBottom: SPACING.m,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+});
+
+
+--- END OF FILE src/components/ui/AppCard.js ---
+
+
+--- START OF FILE src/components/ui/AppInput.js ---
+
+import React, { useState } from "react";
+import { View, TextInput, Text, StyleSheet } from "react-native";
+import { COLORS, SPACING } from "@/constants/theme";
+import PropTypes from "prop-types";
+export const AppInput = ({ label, error, ...props }) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  return (
+    <View style={styles.container}>
+      {label && <Text style={styles.label}>{label}</Text>}
+      <TextInput
+        style={[
+          styles.input,
+          isFocused && styles.focused,
+          error && styles.errorInput,
+        ]}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        placeholderTextColor={COLORS.gray}
+        {...props}
+      />
+      {error && <Text style={styles.errorText}>{error}</Text>}
+    </View>
+  );
+};
+
+AppInput.propTypes = {
+  label: PropTypes.string,
+  error: PropTypes.string,
+};
+
+const styles = StyleSheet.create({
+  container: { marginBottom: SPACING.m },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: 6,
+  },
+  input: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#E5E5EA",
+    borderRadius: 12,
+    paddingHorizontal: SPACING.m,
+    backgroundColor: "#F9F9F9",
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  focused: { borderColor: COLORS.primary, backgroundColor: "#FFF" },
+  errorInput: { borderColor: COLORS.danger },
+  errorText: { color: COLORS.danger, fontSize: 12, marginTop: 4 },
+});
+
+
+--- END OF FILE src/components/ui/AppInput.js ---
+
+
+--- START OF FILE src/components/ui/AppText.js ---
+
+import React from "react";
+import { Text, StyleSheet } from "react-native";
+import { COLORS } from "@/constants/theme";
+import PropTypes from "prop-types";
+
+export const AppText = ({
+  children,
+  variant = "body",
+  color = COLORS.text,
+  style,
+  ...props
+}) => {
+  return (
+    <Text
+      allowFontScaling={false}
+      style={[styles.base, styles[variant], { color: color }, style]}
+      {...props}
+    >
+      {children}
+    </Text>
+  );
+};
+
+AppText.propTypes = {
+  children: PropTypes.node.isRequired,
+  variant: PropTypes.oneOf(["h1", "h2", "body", "caption"]),
+  color: PropTypes.string,
+  style: PropTypes.object,
+};
+
+const styles = StyleSheet.create({
+  base: {
+    fontFamily: "System",
+  },
+  h1: {
+    fontSize: 24,
+    fontWeight: "bold",
+    lineHeight: 32,
+  },
+  h2: {
+    fontSize: 20,
+    fontWeight: "700",
+    lineHeight: 28,
+  },
+  body: {
+    fontSize: 16,
+    fontWeight: "400",
+    lineHeight: 24,
+  },
+  caption: {
+    fontSize: 12,
+    fontWeight: "400",
+    color: COLORS.gray,
+  },
+});
+
+
+--- END OF FILE src/components/ui/AppText.js ---
+
+
+--- START OF FILE src/components/ui/Badge.js ---
+
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { AppText } from "./AppText";
+
+export const Badge = ({ label, type = "default" }) => {
+  const getStyles = () => {
+    switch (type) {
+      case "success":
+        return { bg: "#E8F5E9", text: "#2E7D32" };
+      case "error":
+        return { bg: "#FFEBEE", text: "#C62828" };
+      case "warning":
+        return { bg: "#FFF3E0", text: "#EF6C00" };
+      default:
+        return { bg: "#F5F5F5", text: "#616161" };
+    }
+  };
+
+  const colors = getStyles();
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
+      <AppText style={{ color: colors.text, fontSize: 12, fontWeight: "bold" }}>
+        {label}
+      </AppText>
+    </View>
+  );
+};
+
+Badge.propTypes = {
+  label: PropTypes.string.isRequired,
+  type: PropTypes.oneOf(["default", "success", "error", "warning"]),
+};
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: "flex-start",
+  },
+});
+
+
+--- END OF FILE src/components/ui/Badge.js ---
+
+
+--- START OF FILE src/constants/config.js ---
+
+const ENV = {
+  dev: {
+    API_URL: "http://10.9.0.71:5234/api/",
+  },
+  prod: {
+    API_URL: "https://api.perusahaan.com",
+  },
+};
+
+export const Config = __DEV__ ? ENV.dev : ENV.prod;
+
+
+--- END OF FILE src/constants/config.js ---
+
+
+--- START OF FILE src/constants/theme.js ---
+
+export const COLORS = {
+  primary: "#007AFF",
+  secondary: "#5856D6",
+  white: "#FFFFFF",
+  black: "#000000",
+  gray: "#8E8E93",
+  error: "#FF3B30",
+};
+
+export const SIZES = {
+  padding: 16,
+  radius: 12,
+  font: 14,
+};
+
+export const SPACING = {
+  xs: 4,
+  s: 8,
+  m: 16,
+  l: 24,
+};
+
+
+--- END OF FILE src/constants/theme.js ---
+
+
+--- START OF FILE src/hooks/useAuth.js ---
+
+import { useState } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
+import { loginServices } from "@/services/loginServices";
+
+export const useAuth = () => {
+  const [loading, setLoading] = useState(false);
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  const loginAction = async (username, password) => {
+    try {
+      setLoading(true);
+
+      const loginData = await loginServices.login(username, password);
+
+      console.log("Login Data:", loginData);
+      if (loginData.token) {
+        const targetApp = loginData.listAplikasi?.find(
+          (app) => app.appId === "APP70",
+        );
+
+        if (targetApp) {
+          const permData = await loginServices.getPermission(
+            username,
+            loginData.token,
+          );
+
+          if (permData.token) {
+            setAuth({
+              ...loginData,
+              token: permData.token,
+              listPermission: permData.listPermission,
+            });
+
+            return { success: true };
+          }
+        } else {
+          return {
+            success: false,
+            message: "Anda tidak memiliki akses ke aplikasi ini.",
+          };
+        }
+      }
+
+      return {
+        success: false,
+        message: loginData.errorMessage || "Login Gagal",
+      };
+    } catch (error) {
+      console.error("Login Error:", error);
+      return {
+        success: false,
+        message:
+          error.response?.data?.errorMessage ||
+          "Username / Password tidak valid",
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { loginAction, loading };
+};
+
+
+--- END OF FILE src/hooks/useAuth.js ---
+
+
+--- START OF FILE src/hooks/useInstitusi.js ---
+
+import { institusiServices } from "@/services/institusiServices";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+
+export const useInstitusi = (params) => {
+  return useQuery({
+    queryKey: ["institusi", params],
+    queryFn: () => institusiServices.get(params),
+    placeholderData: keepPreviousData,
+    staleTime: 5000,
+  });
+};
+
+export const useDetailInstitusi = (id) => {
+  return useQuery({
+    queryKey: ["institusi", "detail", id],
+    queryFn: () => institusiServices.getDetail(id),
+    enabled: !!id,
+  });
+};
+
+export const useCreateInstitusi = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: institusiServices.create,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["institusi"],
+      });
+    },
+  });
+};
+
+export const useUpdateInstitusi = (id) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => institusiServices.update(id, data),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["institusi"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["institusi", "detail", id],
+      });
+    },
+  });
+};
+
+export const useDeleteInstitusi = (id) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => institusiServices.delete(id),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["institusi"],
+      });
+    },
+  });
+};
+
+
+--- END OF FILE src/hooks/useInstitusi.js ---
+
+
+--- START OF FILE src/navigation/AppNavigator.js ---
+
+import React from "react";
+import { View, ActivityIndicator } from "react-native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import LoginScreen from "@/screens/general/Login";
+import InstitusiScreen from "@/screens/institusi/Index";
+import DetailInstitusiScreen from "@/screens/institusi/Detail";
+import { useAuthStore } from "@/store/useAuthStore";
+
+export const AppNavigator = () => {
+  const token = useAuthStore((state) => state.token);
+  const _hasHydrated = useAuthStore((state) => state._hasHydrated);
+  const Stack = createNativeStackNavigator();
+
+  if (!_hasHydrated) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  return (
+    <Stack.Navigator>
+      {token ? (
+        <>
+          <Stack.Screen name="Institusi" component={InstitusiScreen} />
+          <Stack.Screen
+            name="DetailInstitusi"
+            component={DetailInstitusiScreen}
+          />
+        </>
+      ) : (
+        <Stack.Screen name="Login" component={LoginScreen} />
+      )}
+    </Stack.Navigator>
+  );
+};
+
+
+--- END OF FILE src/navigation/AppNavigator.js ---
+
+
+--- START OF FILE src/screens/general/Login.js ---
+
+import React, { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/AppButton";
+import { AppCard } from "@/components/ui/AppCard";
+import { AppInput } from "@/components/ui/AppInput";
+import { showMessage } from "react-native-flash-message";
+
+const LoginScreen = () => {
+  const [email, setEmail] = useState("nur.haski");
+  const [password, setPassword] = useState("password");
+  const { loginAction, loading } = useAuth();
+
+  const handleLogin = async () => {
+    const result = await loginAction(email, password);
+    if (!result.success) {
+      showMessage({
+        message: "Login Failed",
+        description: result.message,
+        type: "danger",
+      });
+    }
+  };
+
+  return (
+    <AppCard>
+      <AppInput
+        label="Email Address"
+        placeholder="Enter your email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+      />
+      <AppInput
+        label="Password"
+        placeholder="Enter password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <Button title="Sign In" onPress={handleLogin} loading={loading} />
+    </AppCard>
+  );
+};
+
+export default LoginScreen;
+
+
+--- END OF FILE src/screens/general/Login.js ---
+
+
+--- START OF FILE src/screens/institusi/Detail.js ---
+
+import React from "react";
+import { ScrollView, View, Text, StyleSheet } from "react-native";
+import { useDetailInstitusi } from "@/hooks/useInstitusi";
+import { AppCard } from "@/components/ui/AppCard";
+import { COLORS } from "@/constants/theme";
+import { Button } from "@/components/ui/AppButton";
+import { useAuthStore } from "@/store/useAuthStore";
+import { SkeletonLoader } from "@/components/common/SkeletonLoader";
+import { AppText } from "@/components/ui/AppText";
+import { globalStyles } from "@/styles/globalStyles";
+import PropTypes from "prop-types";
+
+const DetailInstitusiScreen = ({ route }) => {
+  const { id } = route.params;
+  const { data, isLoading, isError, error } = useDetailInstitusi(id);
+  const logout = useAuthStore((state) => state.logout);
+
+  const detail = data;
+
+  console.log("DetailInstitusiScreen data:", detail);
+
+  const InfoRow = ({ label, value }) => (
+    <View style={styles.infoRow}>
+      <AppText style={styles.label}>{label}</AppText>
+      <AppText style={styles.value}>{value || "-"}</AppText>
+    </View>
+  );
+  InfoRow.propTypes = {
+    label: PropTypes.string.isRequired,
+    value: PropTypes.string,
+  };
+
+  if (isLoading) {
+    return (
+      <View style={{ padding: 20 }}>
+        <SkeletonLoader width="60%" height={30} style={{ marginBottom: 20 }} />
+        <SkeletonLoader width="100%" height={100} />
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.center}>
+        <AppText style={{ color: COLORS.danger }}>
+          Error: {error.message}
+        </AppText>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView style={globalStyles.container}>
+      <View style={styles.headerContainer}>
+        <AppText style={styles.title}>{detail.namaInstitusi}</AppText>
+        <View
+          style={[
+            styles.badge,
+            detail.status === "Aktif" ? styles.bgSuccess : styles.bgDanger,
+          ]}
+        >
+          <AppText style={styles.badgeText}>{detail.status}</AppText>
+        </View>
+      </View>
+
+      <Text style={styles.sectionTitle}>Struktur Pimpinan</Text>
+      <AppCard style={styles.card}>
+        <InfoRow label="Direktur" value={detail.namaDirektur} />
+        <InfoRow label="Wadir 1" value={detail.namaWadir1} />
+        <InfoRow label="Wadir 2" value={detail.namaWadir2} />
+        <InfoRow label="Wadir 3" value={detail.namaWadir3} />
+        <InfoRow label="Wadir 4" value={detail.namaWadir4} />
+      </AppCard>
+
+      <Text style={styles.sectionTitle}>Kontak & Lokasi</Text>
+      <AppCard style={styles.card}>
+        <InfoRow label="Alamat" value={detail.alamat} />
+        <InfoRow label="Email" value={detail.email} />
+        <InfoRow label="Telepon" value={detail.telepon} />
+        <InfoRow label="Website" value={detail.website} />
+      </AppCard>
+
+      <Text style={styles.sectionTitle}>Legalitas</Text>
+      <AppCard style={styles.card}>
+        <InfoRow label="Nomor SK" value={detail.nomorSK} />
+        <InfoRow
+          label="Tanggal SK"
+          value={new Date(detail.tanggalSK).toLocaleDateString("id-ID")}
+        />
+      </AppCard>
+      <Button title="Logout / Keluar" variant="outline" onPress={logout} />
+    </ScrollView>
+  );
+};
+
+DetailInstitusiScreen.propTypes = {
+  route: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.number.isRequired,
+    }).isRequired,
+  }).isRequired,
+};
+
+const styles = StyleSheet.create({
+  loader: { flex: 1, justifyContent: "center" },
+  headerContainer: { marginBottom: 20, alignItems: "center" },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#333",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginVertical: 8,
+    color: COLORS.primary,
+  },
+  card: { padding: 12, marginBottom: 10 },
+  infoRow: { marginBottom: 10 },
+  label: { fontSize: 12, color: "#888", marginBottom: 2 },
+  value: { fontSize: 14, color: "#333", fontWeight: "500" },
+  badge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginTop: 8,
+  },
+  bgSuccess: { backgroundColor: "#D4EDDA" },
+  bgDanger: { backgroundColor: "#F8D7DA" },
+  badgeText: { fontSize: 12, fontWeight: "bold" },
+});
+
+export default DetailInstitusiScreen;
+
+
+--- END OF FILE src/screens/institusi/Detail.js ---
+
+
+--- START OF FILE src/screens/institusi/Index.js ---
+
+import React from "react";
+import { FlatList, View, StyleSheet, RefreshControl } from "react-native";
+import { useInstitusi } from "@/hooks/useInstitusi";
+import { InstitusiCard } from "@/components/module/institusi/InstitusiCard";
+import { COLORS } from "@/constants/theme";
+import { AppText } from "@/components/ui/AppText";
+import { Loader } from "@/components/common/Loader";
+import { globalStyles } from "@/styles/globalStyles";
+
+const InstitusiScreen = () => {
+  const params = {
+    PageNumber: 1,
+    PageSize: 10,
+    SearchKeyword: "",
+    Status: "",
+    Urut: "[Nama Institusi] asc",
+  };
+  const { data, isLoading, isError, error, refetch, isFetching } =
+    useInstitusi(params);
+
+  const listData = data?.data || [];
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.center}>
+        <AppText style={styles.errorText}>
+          Terjadi Kesalahan: {error.message}
+        </AppText>
+        <AppText onPress={() => refetch()} style={styles.retryText}>
+          Coba Lagi
+        </AppText>
+      </View>
+    );
+  }
+
+  return (
+    <View style={globalStyles.container}>
+      <AppText style={styles.screenTitle}>
+        Daftar Institusi ({data?.totalData || 0})
+      </AppText>
+
+      <FlatList
+        data={listData}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => <InstitusiCard item={item} />}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isFetching} onRefresh={refetch} />
+        }
+        ListEmptyComponent={
+          <AppText style={styles.emptyText}>Tidak ada data institusi.</AppText>
+        }
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  screenTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 16,
+    color: "#222",
+  },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  errorText: { color: "red", marginBottom: 10 },
+  retryText: {
+    color: COLORS.primary,
+    fontWeight: "bold",
+    textDecorationLine: "underline",
+  },
+  emptyText: { textAlign: "center", marginTop: 20, color: "#999" },
+});
+
+export default InstitusiScreen;
+
+
+--- END OF FILE src/screens/institusi/Index.js ---
+
+
+--- START OF FILE src/services/institusiServices.js ---
+
+import api from "@/api/axiosInstance";
+
+export const institusiServices = {
+  get: async (params) => {
+    const response = await api.get("Institusi/GetAllInstitusi", { params });
+    return response.data;
+  },
+  getDetail: async (id) => {
+    const response = await api.get(`Institusi/DetailInstitusi/${id}`);
+    return response.data;
+  },
+  create: async (payload) => {
+    const response = await api.post("Institusi/CreateInstitusi", payload);
+    return response.data;
+  },
+  update: async (id, payload) => {
+    const response = await api.put(`Institusi/UpdateInstitusi/${id}`, payload);
+    return response.data;
+  },
+  delete: async (id) => {
+    const response = await api.delete(`Institusi/DeleteInstitusi/${id}`);
+    return response.data;
+  },
+};
+
+
+--- END OF FILE src/services/institusiServices.js ---
+
+
+--- START OF FILE src/services/loginServices.js ---
+
+import api from "@/api/axiosInstance";
+
+export const loginServices = {
+  login: async (username, password) => {
+    const response = await api.post("Auth/login", {
+      username,
+      password,
+      jenisAplikasi: "Mobile",
+    });
+    return response.data;
+  },
+  getPermission: async (username, token) => {
+    const response = await api.post(
+      "Auth/getpermission",
+      {
+        username,
+        appId: "APP70",
+        roleId: "ROL01",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  },
+};
+
+
+--- END OF FILE src/services/loginServices.js ---
+
+
+--- START OF FILE src/store/useAuthStore.js ---
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+
+export const useAuthStore = create(
+  persist(
+    (set) => ({
+      token: null,
+      nama: null,
+      listAplikasi: [],
+      isAuthenticated: false,
+
+      setAuth: (data) =>
+        set({
+          token: data.token,
+          nama: data.nama,
+          listAplikasi: data.listAplikasi,
+          isAuthenticated: true,
+          listPermission: data.listPermission || [],
+        }),
+
+      logout: () =>
+        set({
+          token: null,
+          nama: null,
+          listAplikasi: [],
+          isAuthenticated: false,
+          listPermission: [],
+        }),
+    }),
+    { name: "auth-storage", storage: createJSONStorage(() => AsyncStorage) },
+  ),
+);
+
+
+--- END OF FILE src/store/useAuthStore.js ---
+
+
+--- START OF FILE src/styles/globalStyles.js ---
+
+import { StyleSheet } from "react-native";
+
+export const globalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 16,
+  },
+
+  center: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+
+  text: {
+    fontSize: 16,
+    color: "#333",
+  },
+
+  button: {
+    backgroundColor: "#007bff",
+    padding: 12,
+    borderRadius: 8,
+  },
+
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+});
+
+
+--- END OF FILE src/styles/globalStyles.js ---
+
+
+--- START OF FILE src/utils/formatter.js ---
+
+export const formatCurrency = (value) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(value);
+};
+
+export const formatDate = (dateString) => {
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  return new Date(dateString).toLocaleDateString("id-ID", options);
+};
+
+
+--- END OF FILE src/utils/formatter.js ---
+
+
+--- START OF FILE src/utils/permission.js ---
+
+import { useAuthStore } from "@/store/useAuthStore";
+
+export const hasPermission = (permission) => {
+  const { listPermission } = useAuthStore.getState();
+  return listPermission?.includes(permission);
+};
+
+
+--- END OF FILE src/utils/permission.js ---
+
+
+--- START OF FILE src/utils/security.js ---
+
+export const initSecurityScanner = async () => {
+  try {
+    console.log("ðŸ›¡ï¸ freeRASP Security Scanner Active");
+  } catch (error) {
+    console.error("Gagal memulai security scanner", error);
+  }
+};
+
+
+--- END OF FILE src/utils/security.js ---
+
+
+--- START OF FILE App.js ---
+
+import React, { useEffect } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { NavigationContainer } from "@react-navigation/native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import { AppNavigator } from "./src/navigation/AppNavigator";
+import FlashMessage from "react-native-flash-message";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
+import { initSecurityScanner } from "@/utils/security";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 1000 * 60 * 5,
+    },
+  },
+});
+
+export default function App() {
+  useEffect(() => {
+    initSecurityScanner();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <ErrorBoundary>
+            <AppNavigator />
+          </ErrorBoundary>
+          <FlashMessage position="top" />
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </QueryClientProvider>
+  );
+}
+
+
+--- END OF FILE App.js ---
+
+
+--- START OF FILE app.json ---
+
+{
+  "expo": {
+    "name": "astratech-mobile-template",
+    "slug": "astratech-mobile-template",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "jsEngine": "hermes",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "useCleartextTraffic": true,
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.astratech-mobile-template"
+    },
+    "android": {
+      "useCleartextTraffic": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "enableProguardInReleaseBuilds": true,
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
+
+
+--- END OF FILE app.json ---
+
+
+--- START OF FILE index.js ---
+
+import { registerRootComponent } from 'expo';
+
+import App from './App';
+
+registerRootComponent(App);
+
+
+--- END OF FILE index.js ---
+
+
+--- START OF FILE jsconfig.json ---
+
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
+}
+
+
+--- END OF FILE jsconfig.json ---
+
+
+--- START OF FILE package.json ---
+
+{
+  "name": "astratech-mobile-template",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-navigation/native": "^7.1.28",
+    "@react-navigation/native-stack": "^7.11.0",
+    "@tanstack/react-query": "^5.90.20",
+    "axios": "^1.13.4",
+    "expo": "~54.0.32",
+    "expo-status-bar": "~3.0.9",
+    "lucide-react-native": "^0.563.0",
+    "prop-types": "^15.8.1",
+    "react": "19.1.0",
+    "react-hook-form": "^7.71.1",
+    "react-native": "0.81.5",
+    "react-native-flash-message": "^0.4.2",
+    "react-native-mmkv": "^4.1.2",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.10"
+  },
+  "private": true
+}
+
+
+--- END OF FILE package.json ---
+
+
+--- START OF FILE README.md ---
+
+# ASTRATECH MOBILE TEMPLATE
+
+
+
+## Getting started
+
+To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+
+Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+
+## Add your files
+
+- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
+- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+
+```
+cd existing_repo
+git remote add origin http://10.5.0.127:8181/astradualsystem/astratech-mobile-template.git
+git branch -M main
+git push -uf origin main
+```
+
+## Integrate with your tools
+
+- [ ] [Set up project integrations](http://gitlab.example.com/astradualsystem/astratech-mobile-template/-/settings/integrations)
+
+## Collaborate with your team
+
+- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
+- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
+- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
+- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
+- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+
+## Test and Deploy
+
+Use the built-in continuous integration in GitLab.
+
+- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
+- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
+- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
+- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
+- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+
+***
+
+# Editing this README
+
+When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+
+## Suggestions for a good README
+
+Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+
+## Name
+Choose a self-explaining name for your project.
+
+## Description
+Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+
+## Badges
+On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+
+## Visuals
+Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+
+## Installation
+Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+
+## Usage
+Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+
+## Support
+Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+
+## Roadmap
+If you have ideas for releases in the future, it is a good idea to list them in the README.
+
+## Contributing
+State if you are open to contributions and what your requirements are for accepting them.
+
+For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+
+You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+
+## Authors and acknowledgment
+Show your appreciation to those who have contributed to the project.
+
+## License
+For open source projects, say how it is licensed.
+
+## Project status
+If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+
+
+--- END OF FILE README.md ---
+

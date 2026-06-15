@@ -1,0 +1,14 @@
+import { useQuery } from "@tanstack/react-query";
+import { siaMobileServices } from "@/services/siaMobileServices";
+import { useAuthStore } from "@/store/useAuthStore";
+
+export const useDashboard = () => {
+  const nim = useAuthStore((state) => state.nim);
+
+  return useQuery({
+    queryKey: ["dashboard", nim],
+    queryFn: () => siaMobileServices.getDashboard({ Nim: nim }),
+    enabled: !!nim,
+    staleTime: 1000 * 60 * 5,
+  });
+};

@@ -1,0 +1,103 @@
+﻿===========================================
+FOLDER STRUCTURE - astratech-mobile-template
+Root: C:\Users\TUF\Desktop\PERKULIAHAN\SEMESTER 4\MOBILE\PROJEK ORTU BARU\astratech-mobile-template
+Generated: 2026-05-11 08:34:25
+===========================================
+
+C:\Users\TUF\Desktop\PERKULIAHAN\SEMESTER 4\MOBILE\PROJEK ORTU BARU\astratech-mobile-template/
+|-- [DIR] src
+|   |-- [DIR] services
+|   |   |-- [FILE] loginServices.js (0.58 KB)
+|   |   +-- [FILE] institusiServices.js (0.74 KB)
+|   |-- [DIR] screens
+|   |   |-- [DIR] institusi
+|   |   |   |-- [FILE] Index.js (2.18 KB)
+|   |   |   +-- [FILE] Detail.js (4.12 KB)
+|   |   |-- [DIR] general
+|   |   |   +-- [FILE] Login.js (1.21 KB)
+|   |   +-- [FILE] .DS_Store (6 KB)
+|   |-- [DIR] store
+|   |   +-- [FILE] useAuthStore.js (0.82 KB)
+|   |-- [DIR] utils
+|   |   |-- [FILE] security.js (0.2 KB)
+|   |   |-- [FILE] permission.js (0.2 KB)
+|   |   +-- [FILE] formatter.js (0.36 KB)
+|   |-- [DIR] styles
+|   |   +-- [FILE] globalStyles.js (0.53 KB)
+|   |-- [DIR] navigation
+|   |   +-- [FILE] AppNavigator.js (1.14 KB)
+|   |-- [DIR] assets
+|   |   |-- [DIR] images
+|   |   |-- [DIR] icons
+|   |   |-- [DIR] fonts
+|   |   +-- [FILE] .DS_Store (6 KB)
+|   |-- [DIR] api
+|   |   +-- [FILE] axiosInstance.js (1.03 KB)
+|   |-- [DIR] components
+|   |   |-- [DIR] ui
+|   |   |   |-- [FILE] AppText.js (0.99 KB)
+|   |   |   |-- [FILE] Badge.js (1.03 KB)
+|   |   |   |-- [FILE] AppInput.js (1.42 KB)
+|   |   |   |-- [FILE] AppButton.js (1.31 KB)
+|   |   |   +-- [FILE] AppCard.js (0.65 KB)
+|   |   |-- [DIR] module
+|   |   |   |-- [DIR] institusi
+|   |   |   |   +-- [FILE] InstitusiCard.js (2.57 KB)
+|   |   |   +-- [FILE] .DS_Store (6 KB)
+|   |   |-- [DIR] common
+|   |   |   |-- [FILE] SkeletonLoader.js (0.97 KB)
+|   |   |   |-- [FILE] Loader.js (0.24 KB)
+|   |   |   +-- [FILE] ErrorBoundary.js (0.91 KB)
+|   |   +-- [FILE] .DS_Store (6 KB)
+|   |-- [DIR] hooks
+|   |   |-- [FILE] useInstitusi.js (1.48 KB)
+|   |   +-- [FILE] useAuth.js (1.57 KB)
+|   |-- [DIR] constants
+|   |   |-- [FILE] theme.js (0.28 KB)
+|   |   +-- [FILE] config.js (0.18 KB)
+|   +-- [FILE] .DS_Store (8 KB)
+|-- [DIR] ios
+|   |-- [DIR] astratechmobiletemplate.xcodeproj
+|   |   |-- [DIR] xcshareddata
+|   |   |   +-- [DIR] xcschemes
+|   |   |       +-- [FILE] astratechmobiletemplate.xcscheme (3.38 KB)
+|   |   |-- [DIR] project.xcworkspace
+|   |   |   |-- [DIR] xcshareddata
+|   |   |   |   +-- [FILE] IDEWorkspaceChecks.plist (0.23 KB)
+|   |   |   +-- [FILE] contents.xcworkspacedata (0.13 KB)
+|   |   +-- [FILE] project.pbxproj (17.37 KB)
+|   |-- [DIR] astratechmobiletemplate
+|   |   |-- [DIR] Supporting
+|   |   |   +-- [FILE] Expo.plist (0.18 KB)
+|   |   |-- [DIR] Images.xcassets
+|   |   |   |-- [DIR] SplashScreenLegacy.imageset
+|   |   |   |   |-- [FILE] SplashScreenLegacy.png (77.47 KB)
+|   |   |   |   +-- [FILE] Contents.json (0.31 KB)
+|   |   |   |-- [DIR] AppIcon.appiconset
+|   |   |   |   +-- [FILE] Contents.json (0.17 KB)
+|   |   |   +-- [FILE] Contents.json (0.06 KB)
+|   |   |-- [FILE] Info.plist (1.55 KB)
+|   |   |-- [FILE] SplashScreen.storyboard (3.43 KB)
+|   |   |-- [FILE] astratechmobiletemplate-Bridging-Header.h (0.1 KB)
+|   |   |-- [FILE] .DS_Store (6 KB)
+|   |   +-- [FILE] AppDelegate.swift (2.22 KB)
+|   |-- [FILE] Podfile (2.48 KB)
+|   |-- [FILE] Podfile.properties.json (0.08 KB)
+|   |-- [FILE] .xcode.env (0.47 KB)
+|   |-- [FILE] .DS_Store (6 KB)
+|   +-- [FILE] .gitignore (0.31 KB)
+|-- [DIR] assets
+|   |-- [FILE] icon.png (21.86 KB)
+|   |-- [FILE] splash-icon.png (17.14 KB)
+|   |-- [FILE] adaptive-icon.png (17.14 KB)
+|   +-- [FILE] favicon.png (1.43 KB)
+|-- [FILE] package-lock.json (344.83 KB)
+|-- [FILE] jsconfig.json (0.09 KB)
+|-- [FILE] package.json (0.93 KB)
+|-- [FILE] yarn.lock (195.98 KB)
+|-- [FILE] README.md (6.05 KB)
+|-- [FILE] .gitignore (0.51 KB)
+|-- [FILE] .DS_Store (10 KB)
+|-- [FILE] App.js (1.02 KB)
+|-- [FILE] index.js (0.1 KB)
++-- [FILE] app.json (0.87 KB)
